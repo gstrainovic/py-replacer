@@ -1,0 +1,1815 @@
+"'2011_1' As screen":
+    BackgroundImage: =
+    Height: =Max(App.Height, App.DesignHeight)
+    ImagePosition: =ImagePosition.Fill
+    OnHidden: |-
+        =Reset('2011_Lev2-17_1');
+        Reset('2011_Lev3-17_1');
+        Reset('2011_Lev4-17_1');
+        Reset('2011_AuResp-17_1');
+        Reset('2011_AuPerm-17_1');
+        Reset('2011_Obligation-19_1');
+        Reset('2011_BudInt-18_1');
+        Reset('2011_BudExt-18_1');
+        Reset('2011_MonBudInt-18_1');
+        Reset('2011_MonBudExt-18_1');
+        Reset('2011_AuArea-17_1');
+        Set(vIsEdit,false);Set(varShowSort,!varShowSort);
+        Set(varDuplicatePopup,false);Set(varLoadingPopup,false)
+    OnVisible: |-
+        =Set(vFilter,"Overview") // entfällt zukünftig
+        ; Set(vContinue,false)
+        ; Set(V_ShowConfirm,false)
+        ; Set(vAddLevel_1,false)
+        ; Set(vAddLevel_2,false)
+        ; Set(vAddLevel_3,false)
+        ; Set(myedit, false)
+        ; Set(varAddMemo,false)
+        ;
+        
+        // Dopplung der collects prüfen
+        ClearCollect(colCurrentLevel1,'au.level_1');
+        ClearCollect(colCurrentLevel2,'au.level_2');
+        ClearCollect(colCurrentLevel3,'au.level_3');
+        ClearCollect(colCurrentLevel4,'au.level_4');
+        ClearCollect(TempAu_Level_3, 'au.level_3');
+        ClearCollect(TempAu_Level_4, 'au.level_4');
+        ClearCollect(
+            TempAu_Goals,
+            AddColumns(
+                Filter('au.goals', fkey208 = varSelectedAU.ID208),
+                "Edit",""
+            )
+        );
+        ClearCollect(TempRisk,Filter('ri.detail', fkey208 = varSelectedAU.ID208));
+        
+        UpdateContext({
+            locSortColumn: "au_c_goals",
+            locSortAscending: locSortColumn<>"au_c_goals" Or !locSortAscending
+        })
+        ;
+        // Ab hier kopiert aus vorherigem Button RiskTaker
+        /*
+        Set(varAddMemo,false);
+        ClearCollect(colAuAssignment,AddColumns(Filter('au.assignment',fkey208 = varSelectedAU.ID208),"More",""));
+        ClearCollect(colAdAssignment,AddColumns(Filter('ad.assignment',fkey283 in colAuAssignment.fkey283),"More",""));
+        ClearCollect(colAdTraegerCurrent,Filter('ad.traeger',fkey208 = varSelectedAU.ID208));
+        ClearCollect(colAdTraeger,Filter('ad.traeger',fkey208 = varSelectedAU.ID208));
+        Clear(colAdTraeger);
+        ClearCollect(colAuDistributionCurrent,AddColumns(Filter('au.distribution',fkey208 = varSelectedAU.ID208),"More",""));
+        ClearCollect(colAuDistribution,AddColumns(Filter('au.distribution',fkey208 = varSelectedAU.ID208),"More",""));
+        ClearCollect(colAdRolle,AddColumns('ad.rolle',"More",""));
+        */
+    Width: =Max(App.Width, App.DesignWidth)
+
+    "'2011_ResponsePopUp_Timer_1' As timer":
+        Duration: =If(!IsEmpty(Filter(colFlowResponse,type="error")),4000,!IsEmpty(Filter(colFlowResponse,type="success")),2000,varDuplicatePopup,1500)
+        Height: =41
+        OnTimerEnd: =Set(varLoadingPopup,false);Set(varDuplicatePopup,false);Clear(colFlowResponse)
+        Reset: =true
+        Start: =If(!IsEmpty(Filter(colFlowResponse,type="success")),true,!IsEmpty(Filter(colFlowResponse,type="error")),true,varDuplicatePopup,true,false)
+        X: =1130
+        Y: =16
+        ZIndex: =1
+
+    "'2011_OverviewC&S-01_1' As button":
+        BorderThickness: =0
+        Color: =RGBA(0, 0, 0, 0)
+        DisabledFill: =ColorValue(LookUp(UITheme,ID="2",HEX1))
+        DisplayMode: =DisplayMode.Disabled
+        Fill: =
+        Height: =560
+        Text: =""
+        Width: =1209
+        X: =112
+        Y: =180
+        ZIndex: =2
+
+    "'2011_TitleBar_1' As TitleBar":
+        Title: |-
+            =If(vIsFinalAu,Concatenate(varSelectedCore.au_level_1,": ","Prozess anzeigen"),vIsEdit,Concatenate(varSelectedCore.au_level_1,": ","Prozess ändern"),Concatenate(varSelectedCore.au_level_1,": ",LookUp(LangPack,ID= 1603,Text)))
+        ZIndex: =3
+
+    "'2011_ActivityBar_1' As ActivityBar":
+        CallAdmin: ='9000'
+        CallCalendar: =
+        CallHelp: =
+        CallPowerBI: |-
+            =LookUp(colReports,IsMatch(name, "2000", Contains),"https://app.powerbi.com/groups/" & group &"/reports/"& id)
+        CallSharePoint: =
+        CallTasks: =
+        CallTeams: =
+        NavigateHome: ='0000'
+        ShowAdmin: =If(!IsEmpty(Filter(Temp_UserPermissions,ao_transaction="90ADMI03")),true,false)
+        ZIndex: =4
+
+    "'2011_BackArrow-02_1' As icon.BackArrow":
+        BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+        Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+        DisabledBorderColor: =Self.BorderColor
+        DisabledColor: =ColorFade(Self.Color, 70%)
+        Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+        Height: =30
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =ColorFade(Self.Color, -30%)
+        Icon: =Icon.BackArrow
+        OnSelect: |-
+            =Navigate('2010');
+            
+            Set(varSelectedAU,Blank());
+            ClearCollect(TempView_AuditUniverse, Filter('au.vAuditUniverse',ID206 = varSelectedAUVersion.ID206))
+        PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+        PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+        PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+        Width: =30
+        X: =119
+        Y: =80
+        ZIndex: =8
+
+    "'2011_ChosenObjTitle-00_1' As label":
+        AutoHeight: =true
+        BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+        Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+        DisabledBorderColor: =Self.BorderColor
+        DisabledColor: =Self.Color
+        DisabledFill: =Self.Fill
+        Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+        Font: =vFont
+        FontWeight: =FontWeight.Semibold
+        Height: =30
+        Text: =Concatenate(LookUp('ad.mand',ID289=varSelectedAU.fkey289,ad_mand_text),"        ",Coalesce(varSelectedAU.au_prefix_4,varSelectedAU.au_prefix_3),"  ",Coalesce(varSelectedAU.au_level_4,varSelectedAU.au_level_3))
+        Visible: =If(vFilter <> "Overview",true,false)
+        Width: =900
+        X: =160
+        Y: =80
+        ZIndex: =12
+
+    "'2011_Levels-00_3' As label":
+        BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+        Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+        DisabledBorderColor: =Self.BorderColor
+        DisabledColor: =Self.Color
+        DisabledFill: =Self.Fill
+        Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+        Font: =vFont
+        FontWeight: =FontWeight.Semibold
+        Height: =30
+        OnSelect: =
+        PressedBorderColor: ='2011_Levels-00_3'.BorderColor
+        PressedColor: ='2011_Levels-00_3'.Color
+        PressedFill: ='2011_Levels-00_3'.Fill
+        Text: =If(Or(vIsEdit,vIsFinalAu),LookUp(LangPack,ID= 2120,Text),"*"&LookUp(LangPack,ID= 2120,Text))
+        Visible: =If(vFilter ="Overview",true,false)
+        Width: |
+            =200
+        X: =196
+        Y: =269
+        ZIndex: =30
+
+    "'1000_HideResponse-02_23' As icon.Reload":
+        AccessibleLabel: =" "
+        BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+        Color: |-
+            =ColorFade(ColorValue("#9DADBE"), 20%)
+        DisabledBorderColor: =Self.BorderColor
+        DisabledColor: =ColorFade(Self.Color, 70%)
+        Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+        Height: =25
+        HoverBorderColor: =Self.BorderColor
+        HoverColor: =ColorFade(Self.Color, -20%)
+        Icon: =Icon.CancelBadge
+        OnSelect: =Set(varLoadingPopup,false);Set(varDuplicatePopup,false);Clear(colFlowResponse)
+        PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+        PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+        Tooltip: =
+        Visible: ='2011_ResponsePopUp_1'.CancelIconVisibility || varDuplicatePopup
+        Width: =25
+        X: =907
+        Y: =261
+        ZIndex: =31
+
+    "'2011_DuplicatePopUp_1' As DuplicatePopUp":
+        Message: |
+            =varErrorMessage
+        Visible: =varDuplicatePopup
+        X: =69
+        ZIndex: =54
+
+    "'2011_ResponsePopUp_1' As ResponsePopUp":
+        ErrorIcon: =And(!IsEmpty(colFlowResponse),!IsEmpty(Filter(colFlowResponse,type="error")))
+        FlowResponse: =colFlowResponse
+        FlowResponseCodes: =ShowColumns(AddColumns(colFlowResponse,"message",LookUp(colResponseCodes,code=code,message)),"message")
+        LoadingIcon: =IsEmpty(colFlowResponse)
+        Message: =If(And(!IsEmpty(colFlowResponse),!IsEmpty(Filter(colFlowResponse,type="error"))),LookUp(colResponseCodes,code="400",message),And(!IsEmpty(colFlowResponse),IsEmpty(Filter(colFlowResponse,type="error"))),LookUp(colResponseCodes,code="200",message),"Bitte warten...")
+        SuccessIcon: =And(!IsEmpty(colFlowResponse),IsEmpty(Filter(colFlowResponse,type="error")))
+        Visible: =varLoadingPopup
+        X: =69
+        ZIndex: =55
+
+    "'2011_Preloader_1' As Preloader":
+        Fill: =RGBA(255, 255, 255, 0.54)
+        Height: =768
+        Visible: =IsLoading
+        X: =70
+        ZIndex: =56
+
+    "'0000_Info_10' As button":
+        BorderThickness: =0
+        Color: =RGBA(255, 255, 255, 0)
+        DisabledFill: =RGBA(0, 0, 0, 0)
+        Fill: =RGBA(0, 0, 0, 0)
+        Height: =24
+        HoverFill: =Self.Fill
+        OnSelect: |-
+            =Refresh('au.vAuditUniverse');Refresh('au.assignment');
+            ClearCollect(TempView_AuditUniverse, AddColumns(Filter('au.vAuditUniverse',ID206 = varSelectedAUVersion.ID206),"prefix_sort",Value(
+            Concatenate(
+            au_prefix_1,
+            Coalesce(Text(Value(Last(FirstN(Split(au_prefix_2,"."),2)).Result),"000"),"000"),
+            Coalesce(Text(Value(Last(FirstN(Split(au_prefix_3,"."),3)).Result),"000"),"000"),
+            Coalesce(Text(Value(Last(FirstN(Split(au_prefix_4,"."),4)).Result),"000"),"000")
+            ))));
+            Set(varSelectedAU,LookUp(TempView_AuditUniverse,ID208=varGUID208));
+        PressedFill: =Self.Fill
+        Text: =""
+        Width: =70
+        Y: ='2011_ActivityBar_1'.RefreshY
+        ZIndex: =57
+
+    "'2011_1_TabBar' As TabBar":
+        Items: |-
+            =Table(
+                {titleID: 2059, navigation: '2011_1'}
+                , {titleID: 2314, navigation: '2011_2'}
+                , {titleID: 2141, navigation: '2011_3'}
+                , {titleID: 2119, navigation: '2011_4'}
+                , {titleID: 2320, navigation: '2011_5'}
+            )
+        X: =68
+        Y: =117
+        ZIndex: =58
+
+    Label15 As label:
+        Height: =53
+        Italic: =true
+        Text: ="Hier können Prozessebenen hinzugefügt werden, die in SQL noch nicht vorhanden sind."
+        Width: =497
+        X: =773
+        Y: =246
+        ZIndex: =61
+
+    "'2011_1 L4' As group":
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =63
+
+        "'2011_AddL4-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisplayMode: =If(And(IsBlank('2011_Lev3-17_1'.SearchText),IsBlank('2011_Lev3-17_1'.Selected)),DisplayMode.Disabled , DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.Add
+            OnSelect: =Set(vAddLevel_3,true)
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: |-
+                =/* Show only if comboBox process level 4 is empty */
+                IsBlank('2011_Lev4-17_1'.Selected)
+            Width: =24
+            X: =733
+            Y: =394
+            ZIndex: =16
+
+        "'2011_Lev4-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,Coalesce(LookUp('au.level_4',ID204 = varSelectedAU.ID204)))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["au_level_4"]
+            DisplayMode: ='2011_AuMan-17_1'.DisplayMode
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 2108,Text)
+            IsSearchable: =false
+            Items: =Filter('au.level_4', fkey203 = '2011_Lev3-17_1'.Selected.ID203)
+            NoSelectionText: =LookUp(LangPack,ID= 2108,Text)
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["au_level_4"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Width: =500
+            X: =196
+            Y: =393
+            ZIndex: =18
+
+        "'2011_CancelL4-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =24
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.CancelBadge
+            OnSelect: =Reset('2011_TextL4-18_1');Set(vAddLevel_3,false)
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: ='2011_TextL4-18_1'.Visible
+            Width: =24
+            X: =1218
+            Y: =394
+            ZIndex: =20
+
+        "'2011_ChecklL4-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =24
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.CheckBadge
+            OnSelect: |-
+                =If(
+                    IsEmpty(
+                        Filter(
+                            'au.level_4',
+                           ( IsBlankOrError('2011_Lev3-17_1'.Selected.ID203) || fkey203 = '2011_Lev3-17_1'.Selected.ID203 )
+                            && ( IsBlankOrError(Trim('2011_TextL4-18_1'.Text)) || Trim(au_level_4) = Trim('2011_TextL4-18_1'.Text) )
+                        )
+                    ) ,
+                    Set(varLoadingPopup,true);
+                    ClearCollect(
+                        patchTable2011,
+                        Table({
+                            ID204: GUID(),
+                            au_prefix_4: Concatenate(
+                                Trim('2011_Lev3-17_1'.Selected.au_prefix_3),
+                                ".",
+                                Text(
+                                    CountRows(
+                                        Filter(
+                                            'au.level_4',
+                                            StartsWith(Trim(au_prefix_4),Trim('2011_Lev3-17_1'.Selected.au_prefix_3)) && fkey203 = '2011_Lev3-17_1'.Selected.ID203
+                                        )
+                                    ) + 1
+                                )
+                            ),
+                            au_level_4: Trim('2011_TextL4-18_1'.Text),
+                            fkey203: '2011_Lev3-17_1'.Selected.ID203,
+                            active:1,
+                            auth: "*",
+                            tableName: "[au].[level_4]",
+                            type: "POST",
+                            UPN: User().Email
+                        })
+                    );
+                    ClearCollect(colFlowResponse,weDit_SQL_runOperations.Run(JSON(patchTable2011, JSONFormat.IndentFour)))
+                    ; Refresh('au.level_4')
+                    ; Reset('2011_TextL4-18_1')
+                    ; Set(vAddLevel_3,false)
+                    
+                )
+                 
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: ='2011_TextL4-18_1'.Visible
+            Width: =24
+            X: =1188
+            Y: =394
+            ZIndex: =25
+
+        "'2011_TextL4-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vTBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Height: =30
+            HintText: =LookUp(LangPack,ID= 1608,Text)
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =vAddLevel_3
+            Width: =400
+            X: =773
+            Y: =393
+            ZIndex: =27
+
+        "'2011_AuLevel4-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vTBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =LookUp('au.level_4',ID204 = varSelectedAU.ID204,au_level_4)
+            DelayOutput: =true
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PaddingLeft: =5
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Reset: =true
+            Visible: =If(!Or(vIsEdit,vIsFinalAu),false,LookUp('Environment Variable Values','Environment Variable Definition'.'Display Name' = "weDit_PARAMS_AU_useLevel4",Value) <> "yes",false,vFilter ="Overview",true,false)
+            Width: =500
+            X: =196
+            Y: =393
+            ZIndex: =29
+
+    "'2011_1 L3' As group":
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =63
+
+        "'2011_Lev3-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,Coalesce(LookUp('au.level_3',ID203 = varSelectedAU.ID203)))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["au_level_3"]
+            DisplayMode: ='2011_AuMan-17_1'.DisplayMode
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 2107,Text)
+            IsSearchable: =false
+            Items: |-
+                =Sort(
+                    Filter(
+                        'au.level_3', // Verwendung einer Collection prüfen, siehe OnVisible (später nur noch OnVisible 2011_1)
+                        fkey202 = '2011_Lev2-17_1'.Selected.ID202
+                    ),
+                    au_level_3,
+                    Ascending
+                )
+            NoSelectionText: =LookUp(LangPack,ID= 2107,Text)
+            OnChange: =Reset('2011_Lev4-17_1')
+            OnSelect: =
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["au_level_3"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Width: =500
+            X: =196
+            Y: =348
+            ZIndex: =11
+
+        "'2011_AddL3-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisplayMode: =If(And(IsBlank('2011_Lev2-17_1'.SearchText),IsBlank('2011_Lev2-17_1'.Selected)),DisplayMode.Disabled , DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.Add
+            OnSelect: =Set(vAddLevel_2,true)
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: |-
+                =/* Show only if comboBox process level 3 is empty */
+                IsBlank('2011_Lev3-17_1'.Selected)
+            Width: =24
+            X: =733
+            Y: =352
+            ZIndex: =14
+
+        "'2011_CancelL3-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =24
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.CancelBadge
+            OnSelect: =Set(vAddLevel_2,false)
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: ='2011_TextL3-18_1'.Visible
+            Width: =24
+            X: =1218
+            Y: =352
+            ZIndex: =23
+
+        "'2011_CheckL3-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =24
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.CheckBadge
+            OnSelect: |-
+                =If(
+                    IsEmpty(
+                        Filter('au.level_3',
+                
+                            ( IsBlankOrError('2011_Lev2-17_1'.Selected.ID202) || fkey202 = '2011_Lev2-17_1'.Selected.ID202 )
+                            && ( IsBlankOrError(Trim('2011_TextL3-18_1'.Text)) || Trim(au_level_3) = Trim('2011_TextL3-18_1'.Text))
+                        )
+                    ),
+                    Set(varLoadingPopup,true);
+                    ClearCollect(
+                        patchTable2011,
+                        Table({
+                            ID203: GUID(),
+                            au_prefix_3: Concatenate(
+                                Trim('2011_Lev2-17_1'.Selected.au_prefix_2),
+                                ".",
+                                Text(
+                                    CountRows(
+                                        Filter(
+                                            'au.level_3',
+                                            StartsWith(
+                                                Trim(au_prefix_3),Trim('2011_Lev2-17_1'.Selected.au_prefix_2)) && fkey202 = '2011_Lev2-17_1'.Selected.ID202
+                                        )
+                                    ) + 1
+                                )
+                            ),
+                            au_level_3: Trim('2011_TextL3-18_1'.Text),
+                            fkey202: '2011_Lev2-17_1'.Selected.ID202,
+                            auth: "*",
+                            tableName: "[au].[level_3]",
+                                type: "POST",
+                            UPN: User().Email
+                        })
+                    );
+                    ClearCollect(colFlowResponse,weDit_SQL_runOperations.Run(JSON(patchTable2011, JSONFormat.IndentFour)))
+                
+                    ; Refresh('au.level_3')
+                )
+                ; Reset('2011_TextL3-18_1')
+                ; Reset('2011_TextL3-18_1')
+                ; Set(vAddLevel_2, false);
+                    
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: ='2011_TextL3-18_1'.Visible
+            Width: =24
+            X: =1188
+            Y: =352
+            ZIndex: =24
+
+        "'2011_TextL3-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vTBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Height: =30
+            HintText: =LookUp(LangPack,ID= 1607,Text)
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =vAddLevel_2
+            Width: =400
+            X: =773
+            Y: =348
+            ZIndex: =26
+
+        "'2011_AuLevel3-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vTBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =LookUp('au.level_3',ID203 = varSelectedAU.ID203,au_level_3)
+            DelayOutput: =true
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =DisplayMode.Disabled
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PaddingLeft: =5
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Reset: =true
+            Visible: =If(!Or(vIsEdit,vIsFinalAu),false,vFilter ="Overview",true,false)
+            Width: =500
+            X: =196
+            Y: =348
+            ZIndex: =28
+
+    "'2011_1 L2' As group":
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =63
+
+        "'2011_AddL2-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.Add
+            OnSelect: =Set(vAddLevel_1,true);Reset('2011_Lev2-17_1')
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: |-
+                =/* Show only if comboBox process level 2 is empty */
+                IsBlank('2011_Lev2-17_1'.Selected)
+            Width: =24
+            X: =733
+            Y: =305
+            ZIndex: =13
+
+        "'2011_Lev2-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,Coalesce(LookUp('au.level_2',ID202 = varSelectedAU.ID202)))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["au_level_2"]
+            DisplayMode: ='2011_AuMan-17_1'.DisplayMode
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 2106,Text)
+            IsSearchable: =false
+            Items: |-
+                =Sort(
+                    Filter(
+                        'au.level_2', 
+                        fkey201 = varSelectedCore.ID201
+                    ),
+                    au_level_2,
+                    Ascending
+                )
+            NoSelectionText: =LookUp(LangPack,ID= 2106,Text)
+            OnChange: =Reset('2011_Lev3-17_1');Reset('2011_Lev4-17_1');
+            OnSelect: =
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["au_level_2"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Width: =500
+            X: =196
+            Y: =303
+            ZIndex: =17
+
+        "'2011_TextL2-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vTBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Height: =30
+            HintText: =LookUp(LangPack,ID= 1606,Text)
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =vAddLevel_1
+            Width: =400
+            X: =772
+            Y: =303
+            ZIndex: =19
+
+        "'2011_CancelL2-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =24
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.CancelBadge
+            OnSelect: =Set(vAddLevel_1,false)
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: ='2011_TextL2-18_1'.Visible
+            Width: =24
+            X: =1218
+            Y: =305
+            ZIndex: =21
+
+        "'2011_CheckL2-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="136",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =24
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.CheckBadge
+            OnSelect: |-
+                =If(
+                    IsEmpty(
+                        Filter(
+                            'au.level_2',
+                            ( IsBlankOrError(varSelectedCore.ID201) || fkey201 = varSelectedCore.ID201 )
+                            && ( IsBlankOrError('2011_TextL2-18_1'.Text) || au_level_2 = '2011_TextL2-18_1'.Text )
+                        )
+                    ),
+                    Set(varLoadingPopup,true);
+                    ClearCollect(
+                        patchTable2011,
+                        Table({
+                            ID202: GUID(),
+                            au_prefix_3: 
+                            Concatenate(varSelectedCore.au_prefix_1,".",Text(CountRows(Filter('au.level_2',fkey202 = varSelectedCore.ID201)) + 1)),
+                            au_level_2: Trim('2011_TextL2-18_1'.Text),
+                            fkey202: varSelectedCore.ID201,
+                            auth: "*",
+                            tableName: "[au].[level_2]",
+                            type: "GET",
+                            UPN: User().Email
+                        })
+                    );
+                    ClearCollect(colFlowResponse,weDit_SQL_runOperations.Run(JSON(patchTable2011, JSONFormat.IndentFour)))
+                    ;
+                    Refresh('au.level_2')
+                );
+                Set(vAddLevel_1, false);
+                Reset('2011_TextL2-18_1')
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="147",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: ='2011_TextL2-18_1'.Visible
+            Width: =24
+            X: =1188
+            Y: =305
+            ZIndex: =22
+
+    "'2011_Memo PopUp_1' As group":
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =94
+
+        "'2011_MemoPopUp_1' As NewPopUp":
+            FrontHeight: =400
+            FrontWidth: =1020
+            FrontX: =120
+            FrontY: =220
+            Height: ='2011_MemoPopUp_1'.Backgroundheight
+            TitleBarText: =Concatenate(varSelectedGoal.au_goals," – ", LookUp(LangPack,ID= 2007,Text))
+            Visible: =varAddMemo
+            Width: ='2011_MemoPopUp_1'.BackgroundWidth
+            X: =71
+            ZIndex: =50
+
+        "'2011_SaveMemo-02_1' As icon.Reload":
+            AccessibleLabel: =" "
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: |-
+                =ColorFade(ColorValue("#9DADBE"), 20%)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorValue(LookUp(UITheme,ID="153",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.Disabled,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -20%)
+            Icon: =Icon.Save
+            OnSelect: |-
+                =Set(varLoadingPopup,true); 
+                ClearCollect(updateTable2011auGoals,
+                Table({
+                ID205: varSelectedGoal.ID205,
+                au_goals_details: '2011_Memo-18_1'.Text,
+                active:true,
+                tableName: "[au].[goals]",
+                type: "PATCH",
+                    UPN: User().Email
+                }));
+                ClearCollect(colFlowResponse,weDit_SQL_runOperations.Run(JSON(updateTable2011auGoals, JSONFormat.IndentFour)));
+                Refresh('au.goals');
+                ClearCollect(TempAu_Goals,AddColumns(Filter('au.goals', fkey208 = varSelectedAU.ID208),"Edit",""));
+                Set(myedit, false);Set(varAddMemo,false)
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Tooltip: =
+            Visible: =If(vIsFinalAu,false,varAddMemo)
+            Width: =25
+            X: =1132
+            Y: =233
+            ZIndex: =51
+
+        "'2011_Memo-18_1' As text":
+            AccessibleLabel: =" "
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vTBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =varSelectedGoal.au_goals_details
+            DelayOutput: =true
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Height: =330
+            HintText: =LookUp(LangPack,ID= 1305,Text)
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            Mode: =TextMode.MultiLine
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Reset: =true
+            Tooltip: =
+            Visible: =varAddMemo
+            Width: =986
+            X: =206
+            Y: =279
+            ZIndex: =52
+
+        "'2011_Memo_Cancel-02_1' As icon.ArrowRight":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="138",HEX1))
+            Color: |-
+                =ColorFade(ColorValue("#9DADBE"), 20%)
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            Fill: =ColorValue(LookUp(UITheme,ID="137",HEX1))
+            Height: =25
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -20%)
+            Icon: =Icon.CancelBadge
+            OnSelect: =Set(varAddMemo,false);Reset('2011_Memo-18_1')
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="146",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="148",HEX1))
+            Visible: =varAddMemo
+            Width: =30
+            X: =1168
+            Y: =233
+            ZIndex: =53
+
+    Group5 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =95
+
+        "'2011_Obligation-19_1' As checkbox":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="233",HEX1))
+            CheckboxBackgroundFill: =ColorValue(LookUp(UITheme,ID="234",HEX1))
+            CheckboxBorderColor: =ColorValue(LookUp(UITheme,ID="235",HEX1))
+            CheckboxSize: =30
+            CheckmarkFill: =ColorValue(LookUp(UITheme,ID="236",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="231",HEX1))
+            Default: =If(vIsEdit,Coalesce(varSelectedAU.au_mandatory,false))
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="239",HEX1))
+            DisabledColor: =ColorValue(LookUp(UITheme,ID="237",HEX1))
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="238",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="232",HEX1))
+            FocusedBorderColor: =ColorValue(LookUp(UITheme,ID="240",HEX1))
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorValue(LookUp(UITheme,ID="246",HEX1))
+            HoverColor: =ColorValue(LookUp(UITheme,ID="244",HEX1))
+            HoverFill: =ColorValue(LookUp(UITheme,ID="245",HEX1))
+            PressedBorderColor: =ColorValue(LookUp(UITheme,ID="243",HEX1))
+            PressedColor: =ColorValue(LookUp(UITheme,ID="241",HEX1))
+            PressedFill: =ColorValue(LookUp(UITheme,ID="242",HEX1))
+            Text: =LookUp(LangPack,ID= 2115,Text)
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: =200
+            X: =752
+            Y: =468
+            ZIndex: =15
+
+        "'2011_AuResp-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,LookUp('au.responsibility',ID210 = varSelectedAU.fkey210))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["au_respons"]
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 2428,Text)
+            IsSearchable: =false
+            Items: =Sort('au.responsibility',au_respons,Ascending)
+            NoSelectionText: =LookUp(LangPack,ID= 2428,Text)
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["au_respons"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: =500
+            X: =196
+            Y: =539
+            ZIndex: =36
+
+        "'2011_AuArea-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,Coalesce(Filter('ad.orgunit', ID283 in ShowColumns(Filter('au.assignment',fkey208 = varSelectedAU.ID208),"fkey283"))))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["oe_keyintern"]
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 2110,Text)
+            IsSearchable: =false
+            Items: =Sort(Filter('ad.orgunit', fkey289 = '2011_AuMan-17_1'.Selected.ID289),oe_keyintern,Ascending)
+            NoSelectionText: =LookUp(LangPack,ID= 2110,Text)
+            OnSelect: |+
+                =false
+                
+                
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["oe_keyintern"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: =500
+            X: =196
+            Y: =468
+            ZIndex: =44
+
+        "'2011_AuArea-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PressedBorderColor: ='2011_AuArea-00_1'.BorderColor
+            PressedColor: ='2011_AuArea-00_1'.Color
+            PressedFill: ='2011_AuArea-00_1'.Fill
+            Text: =LookUp(LangPack,ID= 2110,Text)
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: |
+                =200
+            X: =194
+            Y: =434
+            ZIndex: =45
+
+        "'2011_AuResp-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PressedBorderColor: ='2011_AuResp-00_1'.BorderColor
+            PressedColor: ='2011_AuResp-00_1'.Color
+            PressedFill: ='2011_AuResp-00_1'.Fill
+            Text: =LookUp(LangPack,ID= 2429,Text)
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: |
+                =200
+            X: =194
+            Y: =506
+            ZIndex: =46
+
+        "'2011_AuRespContact-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,LookUp(AddColumns('ad.contact',"au_head",Surname& ", " & Firstname),ID281 = varSelectedAU.fkey281))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["au_head"]
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 185,Text)
+            IsSearchable: =false
+            Items: =Sort(AddColumns(Filter('ad.contact',active = true),"au_head",Surname& ", " & Firstname),au_head)
+            NoSelectionText: =LookUp(LangPack,ID= 2427,Text)
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["au_head"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: =500
+            X: =756
+            Y: =539
+            ZIndex: =47
+
+        "'2011_AuRespContact-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PressedBorderColor: ='2011_AuRespContact-00_1'.BorderColor
+            PressedColor: ='2011_AuRespContact-00_1'.Color
+            PressedFill: ='2011_AuRespContact-00_1'.Fill
+            Text: =LookUp(LangPack,ID= 2427,Text)
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: |
+                =200
+            X: =754
+            Y: =506
+            ZIndex: =48
+
+    Group7 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =95
+
+        "'2011_Delete-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="164",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="162",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorValue(LookUp(UITheme,ID="166",HEX1))
+            DisplayMode: =If(varSelectedAUVersion.fkey215 <> LookUp('au.status',pos = 3, ID215),DisplayMode.Edit,DisplayMode.Disabled)
+            Fill: =ColorValue(LookUp(UITheme,ID="163",HEX1))
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, 50%)
+            Icon: =Icon.Trash
+            OnSelect: |-
+                =Set(varLoadingPopup,true);
+                ClearCollect(
+                    deleteTable2011auAssignment,
+                    AddColumns(
+                        ShowColumns(
+                            Filter('au.assignment', fkey208 = varSelectedAU.ID208),
+                            "ID228"
+                        ),
+                        "tableName","[au].[assignment]",
+                        "type","DELETE"
+                    )
+                );
+                ClearCollect(
+                    deleteTable2011riDetail,
+                    AddColumns(
+                        ShowColumns(Filter('ri.detail', fkey208 = varSelectedAU.ID208),
+                        "ID213"
+                    ),
+                    "tableName","[ri].[detail]",
+                    "type","DELETE")
+                );
+                ClearCollect(
+                    deleteTable2011auDistribution,
+                    AddColumns(
+                        ShowColumns(
+                            Filter('au.distribution', fkey208 = varSelectedAU.ID208),
+                            "ID237"
+                        ),
+                        "tableName","[au].[distribution]",
+                        "type","DELETE"
+                    )
+                );
+                ClearCollect(
+                    deleteTable2011auGoals,
+                    AddColumns(
+                        ShowColumns(
+                            Filter('au.goals', fkey208 = varSelectedAU.ID208),
+                            "ID205"
+                        ),
+                        "tableName","[au].[goals]",
+                        "type","DELETE"
+                    )
+                );
+                ClearCollect(deleteTable2011auMand,
+                    AddColumns(
+                        ShowColumns(
+                            Filter('au.mand', ID208 = varSelectedAU.ID208),
+                            "ID208"
+                        ),
+                        "tableName","[au].[mand]",
+                        "type","DELETE"
+                    )
+                );
+                //Clear Table and then ReCollect
+                Clear(deleteTable2011);
+                Collect(deleteTable2011,deleteTable2011auAssignment);
+                Collect(deleteTable2011,deleteTable2011riDetail);
+                Collect(deleteTable2011,deleteTable2011auDistribution);
+                Collect(deleteTable2011,deleteTable2011auGoals);
+                Collect(deleteTable2011,deleteTable2011auMand);
+                
+                ClearCollect(colFlowResponse,weDit_SQL_runOperations.Run(JSON(deleteTable2011, JSONFormat.IndentFour)));
+                
+                Refresh('au.vAuditUniverse');
+                ClearCollect(
+                    TempView_AuditUniverse, 
+                    Filter('au.vAuditUniverse_',ID206 = varSelectedAUVersion.ID206)   
+                );
+                Back()
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.HoverColor
+            Visible: =If(vIsFinalAu,false,And(vIsEdit,vFilter ="Overview"),true,false)
+            Width: =30
+            X: =1282
+            Y: =80
+            ZIndex: =59
+
+        "'2011_SaveOverview-02_1' As icon.Reload":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="151",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="149",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =ColorValue(LookUp(UITheme,ID="153",HEX1))
+            Fill: =ColorValue(LookUp(UITheme,ID="150",HEX1))
+            Height: =30
+            HoverBorderColor: =Self.BorderColor
+            HoverColor: =ColorFade(Self.Color, -30%)
+            Icon: =Icon.Save
+            OnSelect: |+
+                =If(
+                    IsBlankOrError('2011_Lev2-17_1'.Selected.ID202) || IsBlankOrError('2011_AuMan-17_1'.Selected.ID289),
+                    
+                    Set(varErrorMessage,"Bitte füllen Sie alle erforderlichen Felder aus."); // Task 125
+                    Set(varDuplicatePopup,true),
+                //Else If
+                    Clear(colFlowResponse);
+                    // ################# //
+                    Set(
+                        varGUID207,
+                        LookUp(
+                            'au.complete',
+                            And(
+                                fkey201 = varSelectedCore.ID201,
+                                fkey202 = '2011_Lev2-17_1'.Selected.ID202,
+                                fkey203 = '2011_Lev3-17_1'.Selected.ID203,
+                                fkey204 = '2011_Lev4-17_1'.Selected.ID204),
+                            ID207)
+                        );
+                    If(
+                        IsBlankOrError(varGUID207),
+                        Set(var207Exists,false);
+                        Set(varGUID207,GUID()),
+                    //Else If
+                        Set(var207Exists,true)
+                    );
+                    Clear(patchTable2011auComplete);
+                    If(
+                        !var207Exists,
+                        ClearCollect(
+                            patchTable2011auComplete,
+                            Table({
+                                ID207 :varGUID207,
+                                fkey201 : varSelectedCore.ID201,
+                                fkey202 : If(!IsBlank('2011_Lev2-17_1'.Selected),'2011_Lev2-17_1'.Selected.ID202,Blank()),
+                                fkey203 : If(!IsBlank('2011_Lev3-17_1'.Selected),'2011_Lev3-17_1'.Selected.ID203,Blank()),
+                                fkey204:  If(!IsBlank('2011_Lev4-17_1'.Selected),'2011_Lev4-17_1'.Selected.ID204,Blank()),
+                                blocked : 0,
+                                auth: If(IsBlank('2011_AuPerm-17_1'.Selected),"*",'2011_AuPerm-17_1'.Selected.ao_info_short),
+                                active: true,
+                                tableName: "[au].[complete]",
+                                type: "POST",
+                                UPN: User().Email
+                            })
+                        )
+                    );
+                // ################# //
+                    Set(varGUID206,varSelectedAUVersion.ID206);
+                    Set(varGUID208,LookUp('au.mand',And(fkey207 = varGUID207, fkey289 = '2011_AuMan-17_1'.Selected.ID289, fkey206 = varGUID206),ID208));
+                    If(
+                        IsBlankOrError(varGUID208),
+                        Set(var208Exists,false)
+                        ; Set(varGUID208,GUID()),
+                    // Else If
+                        Set(var208Exists,true)
+                    );
+                    Clear(patchTable2011auMand);
+                    If(
+                        !var208Exists,
+                        ClearCollect(
+                            patchTable2011auMand,
+                            Table({
+                                ID208: varGUID208,
+                                fkey207: varGUID207,
+                                fkey289: '2011_AuMan-17_1'.Selected.ID289,
+                                fkey281: '2011_AuRespContact-17_1'.Selected.ID281,
+                                fkey283: If(!IsBlankOrError('2011_AuArea-17_1'.Selected),'2011_AuArea-17_1'.Selected.ID283,Blank()),
+                                fkey206: varSelectedAUVersion.ID206,
+                                fkey209: GUID(),
+                                fkey210: If(!IsBlankOrError('2011_AuResp-17_1'.Selected),'2011_AuResp-17_1'.Selected.ID210,Blank()),
+                                au_mandatory: If('2011_Obligation-19_1'.Value = true, 1,0),
+                                au_intdays: If(And(!IsBlankOrError('2011_BudInt-18_1'.Text),IsNumeric(Value('2011_BudInt-18_1'.Text))),Value('2011_BudInt-18_1'.Text),Blank()),
+                                au_intbudget: If(And(!IsBlankOrError('2011_MonBudInt-18_1'.Text),IsNumeric(Value('2011_MonBudInt-18_1'.Text))),Value('2011_MonBudInt-18_1'.Text),Blank()),
+                                au_extbudget: If(And(!IsBlankOrError('2011_MonBudExt-18_1'.Text),IsNumeric(Value('2011_MonBudExt-18_1'.Text))),Value('2011_MonBudExt-18_1'.Text),Blank()),
+                                au_extdays: If(And(!IsBlankOrError('2011_BudExt-18_1'.Text),IsNumeric(Value('2011_BudExt-18_1'.Text))),Value('2011_BudExt-18_1'.Text),Blank()),
+                                active: varSelectedAUVersion.active,
+                                blocked: 0,
+                                au_include: 1,
+                                auth: Coalesce('2011_AuPerm-17_1'.Selected.ao_info_short,"*"),
+                                tableName: "[au].[mand]",
+                                type: "POST",
+                                UPN: User().Email
+                            })
+                        ),
+                    // Else If
+                        ClearCollect(
+                            patchTable2011auMand,
+                            Table({
+                                ID208: varGUID208,
+                                fkey281: '2011_AuRespContact-17_1'.Selected.ID281,
+                                fkey283: If(!IsBlankOrError('2011_AuArea-17_1'.Selected),'2011_AuArea-17_1'.Selected.ID283,Blank()),
+                                fkey210: If(!IsBlankOrError('2011_AuResp-17_1'.Selected),'2011_AuResp-17_1'.Selected.ID210,Blank()),
+                                au_mandatory: If('2011_Obligation-19_1'.Value = true, 1,0),
+                                au_intdays: If(And(!IsBlankOrError('2011_BudInt-18_1'.Text),IsNumeric(Value('2011_BudInt-18_1'.Text))),Value('2011_BudInt-18_1'.Text),Blank()),
+                                au_intbudget: If(And(!IsBlankOrError('2011_MonBudInt-18_1'.Text),IsNumeric(Value('2011_MonBudInt-18_1'.Text))),Value('2011_MonBudInt-18_1'.Text),Blank()),
+                                au_extbudget: If(And(!IsBlankOrError('2011_MonBudExt-18_1'.Text),IsNumeric(Value('2011_MonBudExt-18_1'.Text))),Value('2011_MonBudExt-18_1'.Text),Blank()),
+                                au_extdays: If(And(!IsBlankOrError('2011_BudExt-18_1'.Text),IsNumeric(Value('2011_BudExt-18_1'.Text))),Value('2011_BudExt-18_1'.Text),Blank()),
+                                auth: Coalesce('2011_AuPerm-17_1'.Selected.ao_info_short,"*"),
+                                tableName: "[au].[mand]",
+                                type: "PATCH",
+                                UPN: User().Email
+                            })
+                        )
+                    ) ;
+                // ################# //
+                
+                    Clear(patchTable2011auAssignment);    
+                    ForAll(
+                        // Nested Filter!!
+                        Filter(
+                            '2011_AuArea-17_1'.SelectedItems,
+                            !(ID283 in Filter('au.assignment',fkey208= varGUID208).fkey283)
+                        ),
+                        Collect(
+                            patchTable2011auAssignment,
+                            Table({
+                                ID228: GUID(),
+                                fkey208: varGUID208,
+                                fkey283: ID283,
+                                active: varSelectedAUVersion.active,
+                                tableName: "[au].[assignment]",
+                                type: "POST",
+                                UPN: User().Email
+                            })
+                        )
+                    );
+                    ForAll(
+                        Filter(
+                            'au.assignment',
+                            And(fkey208 = varSelectedAU.ID208,!(fkey283 in '2011_AuArea-17_1'.SelectedItems.ID283))
+                        ),
+                        Collect(
+                            patchTable2011auAssignment,
+                            Table({
+                                ID228: ID228,
+                                tableName: "[au].[assignment]",
+                                type: "DELETE",
+                                UPN: User().Email
+                            })
+                        )
+                    )
+                    ; Set(varLoadingPopup,true)
+                    ; Clear(patchTable2011AU)
+                    // Tabellen werden an patchTable2011AU angefügt sofern sie nicht leer sind.
+                    // Testen ob ein Collecten von leeren Tabellen auch funktioniert, dann könnte man die in einem Rutsch collecten
+                    ; If(!IsEmpty(patchTable2011auComplete),Collect(patchTable2011AU,patchTable2011auComplete))
+                    ; If(!IsEmpty(patchTable2011auMand),Collect(patchTable2011AU,patchTable2011auMand))
+                    ; If(!IsEmpty(patchTable2011auAssignment),Collect(patchTable2011AU,patchTable2011auAssignment))
+                    
+                    ; If(
+                        !IsEmpty(patchTable2011AU),
+                        ClearCollect(colFlowResponse,weDit_SQL_runOperations.Run(JSON(patchTable2011AU, JSONFormat.IndentFour)))
+                        ; Refresh('au.vAuditUniverse');Refresh('au.assignment')
+                        ; ClearCollect(
+                            TempView_AuditUniverse, 
+                            Filter('au.vAuditUniverse_',ID206 = varSelectedAUVersion.ID206)            
+                            )
+                        )
+                        ; Set(varSelectedAU,LookUp(TempView_AuditUniverse, ID208=varGUID208)
+                    )
+                    ; Set(vIsEdit,true)
+                    ; ClearCollect(TempRi_Question,'ri.question')
+                )
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+            PressedBorderColor: =Self.BorderColor
+            PressedColor: =Self.HoverColor
+            Visible: =If(vIsFinalAu,false,vFilter = "Overview",true,false)
+            Width: =30
+            X: =1242
+            Y: =80
+            ZIndex: =60
+
+    Group6 As group:
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =95
+
+        "'2011_BudInt-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vDBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =Coalesce(Text(varSelectedAU.au_intdays),"")
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Format: =TextFormat.Number
+            Height: =30
+            HintText: =LookUp(LangPack,ID= 2639,Text)
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =120
+            X: =256
+            Y: =633
+            ZIndex: =32
+
+        "'2011_BudExt-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vDBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =Coalesce(Text(varSelectedAU.au_extdays),"")
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Format: =TextFormat.Number
+            Height: =30
+            HintText: =LookUp(LangPack,ID= 2639,Text)
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =120
+            X: =256
+            Y: =678
+            ZIndex: =33
+
+        "'2011_MonBudInt-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vDBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =Coalesce(Text(varSelectedAU.au_intbudget),"")
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Format: =TextFormat.Number
+            Height: =30
+            HintText: =varCurrency
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =120
+            X: =520
+            Y: =633
+            ZIndex: =34
+
+        "'2011_MonBudExt-18_1' As text":
+            BorderColor: =ColorFade(Self.Fill, -10%)
+            BorderThickness: =vDBorderThickness
+            Color: =ColorValue(LookUp(UITheme,ID="218",HEX1))
+            Default: =Coalesce(Text(varSelectedAU.au_extbudget),"")
+            DisabledBorderColor: =ColorValue(LookUp(UITheme,ID="223",HEX1))
+            DisabledColor: =Self.Color
+            DisabledFill: =ColorValue(LookUp(UITheme,ID="222",HEX1))
+            DisplayMode: =If(vIsFinalAu,DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="219",HEX1))
+            FocusedBorderThickness: =vTBorderThickness
+            Font: =vFont
+            Format: =TextFormat.Number
+            Height: =30
+            HintText: =varCurrency
+            HoverBorderColor: =ColorFade(Self.BorderColor, -10%)
+            HoverColor: =ColorFade(Self.Color, -10%)
+            HoverFill: =ColorFade(Self.Fill, -10%)
+            PressedBorderColor: =ColorFade(Self.BorderColor, -10%)
+            PressedFill: =ColorFade(Self.Fill, -10%)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =120
+            X: =520
+            Y: =678
+            ZIndex: =35
+
+        "'2011_AuPerm-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            DefaultSelectedItems: =If(vIsEdit,LookUp('ao.information', ao_info_short = varSelectedAU.auth_au))
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["ao_info_short"]
+            DisplayMode: =DisplayMode.Disabled//If(vIsFinalAu;DisplayMode.View;vContinue;DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 1708,Text)
+            IsSearchable: =false
+            Items: =Sort('ao.information',ao_info_short,Ascending)
+            NoSelectionText: =LookUp(LangPack,ID= 1708,Text)
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["ao_info_short"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: =350
+            X: =756
+            Y: =623
+            ZIndex: =37
+
+        "'2011_AuPerm-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Text: =LookUp(LangPack,ID= 2909,Text)
+            Visible: =If(vFilter ="Overview",true,false)
+            Width: =400
+            X: =754
+            Y: =593
+            ZIndex: =39
+
+        "'2011_Title2-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Text: =LookUp(LangPack,ID= 2633,Text)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =250
+            X: =256
+            Y: =593
+            ZIndex: =40
+
+        "'2011_Title3-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Text: |
+                =Concatenate(LookUp(LangPack,ID= 2713,Text)," ",varCurrency)
+            Visible: =If(vFilter = "Overview",true,false)
+            X: =511
+            Y: =593
+            ZIndex: =41
+
+        "'2011_Internal-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =10
+            Text: =LookUp(LangPack,ID= 2708,Text)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =60
+            X: =196
+            Y: =628
+            ZIndex: =42
+
+        "'2011_External-00_1' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            Size: =10
+            Text: =LookUp(LangPack,ID= 2703,Text)
+            Visible: =If(vFilter = "Overview",true,false)
+            Width: =60
+            X: =196
+            Y: =673
+            ZIndex: =43
+
+    "'2011_1_AuMan' As group":
+        Height: =5
+        Width: =5
+        X: =40
+        Y: =40
+        ZIndex: =95
+
+        "'2011_AuMan-17_1' As combobox":
+            BorderColor: =ColorFade(Self.ChevronBackground, 10%)
+            BorderThickness: =vDBorderThickness
+            ChevronBackground: =ColorValue(LookUp(UITheme,ID="200",HEX1))
+            ChevronDisabledBackground: =ColorFade(Self.ChevronBackground, 70%)
+            ChevronDisabledFill: =ColorFade(Self.ChevronFill, 70%)
+            ChevronFill: =ColorValue(LookUp(UITheme,ID="199",HEX1))
+            ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+            ChevronHoverFill: =Self.ChevronFill
+            Color: =ColorValue(LookUp(UITheme,ID="195",HEX1))
+            Default: =LookUp('ad.mand',ID289 = varSelectedAU.fkey289)
+            DefaultSelectedItems: =Coalesce(LookUp('ad.mand',ID289=varSelectedAU.fkey289),'2010_Client-07'.Selected)
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Color, 70%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            DisplayFields: =["ad_mand_text"]
+            DisplayMode: =If(Or(vIsEdit,vIsFinalAu),DisplayMode.View,DisplayMode.Edit)
+            Fill: =ColorValue(LookUp(UITheme,ID="196",HEX1))
+            FocusedBorderThickness: =vTFocusedBorderThickness
+            Font: =vFont
+            Height: =30
+            HoverBorderColor: =ColorFade(Self.BorderColor, -20%)
+            HoverColor: =Self.Color
+            HoverFill: =ColorFade(Self.Fill, 70%)
+            InputTextPlaceholder: =LookUp(LangPack,ID= 2412,Text)
+            IsSearchable: =false
+            Items: =Sort('ad.mand',ad_mand_text)
+            NoSelectionText: =LookUp(LangPack,ID= 2412,Text)
+            OnChange: =
+            OnSelect: =
+            PaddingTop: =2
+            PressedBorderColor: =ColorFade(Self.BorderColor, -30%)
+            PressedColor: =ColorValue(LookUp(UITheme,ID="212",HEX1))
+            PressedFill: =ColorFade(Self.Fill, -50%)
+            Reset: =true
+            SearchFields: =["ad_mand_text"]
+            SearchItems: =[]
+            SelectionColor: =Self.Color
+            SelectionFill: =ColorFade(Self.Fill, -20%)
+            SelectionTagColor: =Self.Color
+            SelectionTagFill: =Self.Fill
+            SelectMultiple: =false
+            Width: =500
+            X: =196
+            Y: =227
+            ZIndex: =38
+
+        "'2011_Levels-00_2' As label":
+            BorderColor: =ColorValue(LookUp(UITheme,ID="103",HEX1))
+            Color: =ColorValue(LookUp(UITheme,ID="101",HEX1))
+            DisabledBorderColor: =Self.BorderColor
+            DisabledColor: =Self.Color
+            DisabledFill: =Self.Fill
+            Fill: =ColorValue(LookUp(UITheme,ID="102",HEX1))
+            Font: =vFont
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            OnSelect: =
+            PressedBorderColor: ='2011_Levels-00_2'.BorderColor
+            PressedColor: ='2011_Levels-00_2'.Color
+            PressedFill: ='2011_Levels-00_2'.Fill
+            Text: =If(Or(vIsEdit,vIsFinalAu),LookUp(LangPack,ID= 2412,Text),"*"&LookUp(LangPack,ID= 2412,Text))
+            Width: |
+                =200
+            X: =196
+            Y: =196
+            ZIndex: =49
+
