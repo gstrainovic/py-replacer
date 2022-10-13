@@ -375,8 +375,8 @@
                     ClearCollect(
                         patchTable2011,
                         Table({
-                            ID204: GUID(),
-                            au_prefix_4: Concatenate(
+                            Id: GUID(),
+                            prefix1: Concatenate(
                                 Trim('2011_Lev3-17_1'.Selected.au_prefix_3),
                                 ".",
                                 Text(
@@ -392,7 +392,7 @@
                             fkey203: '2011_Lev3-17_1'.Selected.ID203,
                             active:1,
                             auth: "*",
-                            tableName: "[au].[level_4]",
+                            tableName: "[au].[level_1]",
                             type: "POST",
                             UPN: User().Email
                         })
@@ -591,8 +591,8 @@
                     ClearCollect(
                         patchTable2011,
                         Table({
-                            ID203: GUID(),
-                            au_prefix_3: Concatenate(
+                            Id: GUID(),
+                            prefix3: Concatenate(
                                 Trim('2011_Lev2-17_1'.Selected.au_prefix_2),
                                 ".",
                                 Text(
@@ -600,13 +600,13 @@
                                         Filter(
                                             'au.level_3',
                                             StartsWith(
-                                                Trim(au_prefix_3),Trim('2011_Lev2-17_1'.Selected.au_prefix_2)) && fkey202 = '2011_Lev2-17_1'.Selected.ID202
+                                                Trim(prefix3),Trim('2011_Lev2-17_1'.Selected.au_prefix_2)) && universeLevel2Id = '2011_Lev2-17_1'.Selected.ID202
                                         )
                                     ) + 1
                                 )
                             ),
-                            au_level_3: Trim('2011_TextL3-18_1'.Text),
-                            fkey202: '2011_Lev2-17_1'.Selected.ID202,
+                            universeLevel3: Trim('2011_TextL3-18_1'.Text),
+                            universeLevel2Id: '2011_Lev2-17_1'.Selected.ID202,
                             auth: "*",
                             tableName: "[au].[level_3]",
                                 type: "POST",
@@ -831,14 +831,14 @@
                     ClearCollect(
                         patchTable2011,
                         Table({
-                            ID202: GUID(),
-                            au_prefix_3: 
-                            Concatenate(varSelectedCore.au_prefix_1,".",Text(CountRows(Filter('au.level_2',fkey202 = varSelectedCore.ID201)) + 1)),
-                            au_level_2: Trim('2011_TextL2-18_1'.Text),
-                            fkey202: varSelectedCore.ID201,
+                            Id: GUID(),
+                            prefix2: 
+                            Concatenate(varSelectedCore.au_prefix_1,".",Text(CountRows(Filter('au.level_2',universeLevel1Id = varSelectedCore.ID201)) + 1)),
+                            universeLevel2: Trim('2011_TextL2-18_1'.Text),
+                            universeLevel1Id: varSelectedCore.ID201,
                             auth: "*",
                             tableName: "[au].[level_2]",
-                            type: "GET",
+                            type: "POST",
                             UPN: User().Email
                         })
                     );

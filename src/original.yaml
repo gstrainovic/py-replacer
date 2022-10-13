@@ -375,8 +375,8 @@
                     ClearCollect(
                         patchTable2011,
                         Table({
-                            ID204: GUID(),
-                            au_prefix_4: Concatenate(
+                            ID201: GUID(),
+                            au_prefix_1: Concatenate(
                                 Trim('2011_Lev3-17_1'.Selected.au_prefix_3),
                                 ".",
                                 Text(
@@ -392,7 +392,7 @@
                             fkey203: '2011_Lev3-17_1'.Selected.ID203,
                             active:1,
                             auth: "*",
-                            tableName: "[au].[level_4]",
+                            tableName: "[au].[level_1]",
                             type: "POST",
                             UPN: User().Email
                         })
