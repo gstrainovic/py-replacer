@@ -77,7 +77,6 @@ def main():
 
 def replace_between(match, match_str, from_str, to_str):
     if match_str in match.group(1):
-        print("Replacing " + from_str + " with " + to_str + " in " + match.group(1))
         return match.group(0).replace(from_str, to_str)
     else:
         return match.group(0)
